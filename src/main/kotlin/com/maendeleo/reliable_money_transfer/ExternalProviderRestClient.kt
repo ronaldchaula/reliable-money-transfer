@@ -42,6 +42,10 @@ class ExternalProviderRestClient(
         null
     } catch (error: org.springframework.web.client.ResourceAccessException) {
         throw ProviderFailure.Network(error)
+    } catch (error: org.springframework.web.client.HttpServerErrorException) {
+        throw ProviderFailure.Server(error.statusCode.value(), error)
+    } catch (error: org.springframework.web.client.HttpClientErrorException) {
+        throw ProviderFailure.Client(error.statusCode.value(), error)
     }
 }
 

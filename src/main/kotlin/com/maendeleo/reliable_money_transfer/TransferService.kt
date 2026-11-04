@@ -35,8 +35,17 @@ class TransferService(
         while (current.status == TransferStatus.PENDING || current.status == TransferStatus.UNKNOWN_OUTCOME) {
             if (current.status == TransferStatus.UNKNOWN_OUTCOME) {
                 // A timeout may mean the provider committed. Resolve before any new POST.
-                provider.findByIdempotencyKey(current.idempotencyKey)?.let { result ->
-                    return save(current.copy(status = TransferStatus.SUCCEEDED, providerTransferId = result.providerTransferId, providerMessage = result.message)).toResult()
+                try {
+                    provider.findByIdempotencyKey(current.idempotencyKey)?.let { result ->
+                        return save(current.copy(status = TransferStatus.SUCCEEDED, providerTransferId = result.providerTransferId, providerMessage = result.message)).toResult()
+                    }
+                } catch (failure: ProviderFailure) {
+                    // The provider is still unreachable. Keep the operation resumable instead of returning 500.
+                    current = save(current.copy(providerMessage = failure.message))
+                    val decision = retryPolicy.next(maxOf(1, current.attemptCount))
+                    if (!decision.shouldRetry) return current.toResult()
+                    sleep(decision.delay.inWholeMilliseconds)
+                    continue
                 }
                 current = save(current.copy(status = TransferStatus.PENDING))
             }
