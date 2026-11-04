@@ -7,6 +7,9 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 
 PORT = int(os.getenv("MOCK_PROVIDER_PORT", "8081"))
 TRANSFERS = {}
+POST_COUNT = 0
+FAIL_FIRST = os.getenv("MOCK_FAIL_FIRST", "false").lower() == "true"
+ALWAYS_FAIL = os.getenv("MOCK_ALWAYS_FAIL", "false").lower() == "true"
 
 
 class ProviderHandler(BaseHTTPRequestHandler):
@@ -31,6 +34,7 @@ class ProviderHandler(BaseHTTPRequestHandler):
         self._send(404, {"message": "not found"})
 
     def do_POST(self):
+        global POST_COUNT
         if self.path != "/transfers":
             self._send(404, {"message": "not found"})
             return
@@ -38,6 +42,12 @@ class ProviderHandler(BaseHTTPRequestHandler):
         key = self.headers.get("Idempotency-Key")
         if not key:
             self._send(400, {"message": "Idempotency-Key header is required"})
+            return
+
+        POST_COUNT += 1
+        if ALWAYS_FAIL or (FAIL_FIRST and POST_COUNT == 1):
+            print(f"simulated temporary failure for key={key}", flush=True)
+            self._send(503, {"message": "simulated provider outage"})
             return
 
         # Duplicate submissions return the original provider result.

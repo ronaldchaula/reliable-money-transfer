@@ -79,6 +79,52 @@ GET  /transfers/by-idempotency-key/{key}
 
 It stores every `Idempotency-Key` in memory and returns the same provider result for duplicate requests.
 
+### Simulate provider failures
+
+To make the first provider `POST` return HTTP `503`, then allow the next retry to succeed:
+
+```bash
+Ctrl+C
+MOCK_FAIL_FIRST=true python3 mock_provider.py
+```
+
+Submit a new transfer using a new `clientReference`:
+
+```bash
+curl -X POST http://localhost:8080/api/transfers \
+  -H "Content-Type: application/json" \
+  -d '{
+    "clientReference": "failure-test-001",
+    "sourceAccount": "wallet-A",
+    "destinationAccount": "wallet-B",
+    "amountMinor": 2500,
+    "currency": "TZS"
+  }'
+```
+
+Expected behavior:
+
+1. The mock returns `503` on the first provider request.
+2. The application waits according to the retry policy.
+3. The application retries with the same `Idempotency-Key`.
+4. The mock accepts the retry and the application returns `SUCCEEDED`.
+
+To make every provider `POST` fail with HTTP `503`:
+
+```bash
+Ctrl+C
+MOCK_ALWAYS_FAIL=true python3 mock_provider.py
+```
+
+The application will retry until the configured maximum attempt count and then return the current non-success state. Use `Ctrl+C` to stop the mock provider and restart it normally:
+
+```bash
+Ctrl+C
+python3 mock_provider.py
+```
+
+Use a new `clientReference` for a new test. Reusing a reference returns the existing logical transfer record.
+
 ## Check the services
 
 Check the provider:
