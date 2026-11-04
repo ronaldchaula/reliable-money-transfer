@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900">
+  <style>
+    .bg{fill:#08121f}.box{fill:#102b42;stroke:#5ce1e6;stroke-width:2;rx:18}.store{fill:#15263c;stroke:#f2b95e;stroke-width:2}.title{fill:#f4f7fb;font:700 34px Arial}.label{fill:#f4f7fb;font:700 22px Arial}.small{fill:#b9c8d8;font:16px Arial}.arrow{stroke:#8ee5e8;stroke-width:3;fill:none;marker-end:url(#m)}.retry{stroke:#f2b95e;stroke-width:3;fill:none;marker-end:url(#m2)}
+  </style>
+  <defs><marker id="m" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><path d="M0,0 L10,3 L0,6 Z" fill="#8ee5e8"/></marker><marker id="m2" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><path d="M0,0 L10,3 L0,6 Z" fill="#f2b95e"/></marker></defs>
+  <rect class="bg" width="1600" height="900"/><text class="title" x="80" y="78">Reliable transfer architecture for a bank / MNO mobile app</text>
+  <rect class="box" x="80" y="190" width="250" height="130"/><text class="label" x="115" y="240">Mobile app</text><text class="small" x="115" y="275">Kotlin + Compose</text><text class="small" x="115" y="300">WorkManager + Room</text>
+  <rect class="store" x="80" y="430" width="250" height="115"/><text class="label" x="115" y="480">Encrypted local job</text><text class="small" x="115" y="515">stable client reference</text>
+  <rect class="box" x="520" y="180" width="280" height="150"/><text class="label" x="555" y="235">Transfer API</text><text class="small" x="555" y="270">Ktor / Spring Boot</text><text class="small" x="555" y="300">auth, limits, risk, ledger</text>
+  <rect class="store" x="520" y="440" width="280" height="115"/><text class="label" x="555" y="490">Transfer DB</text><text class="small" x="555" y="525">unique idempotency key</text>
+  <rect class="box" x="980" y="180" width="260" height="150"/><text class="label" x="1015" y="235">Outbox worker</text><text class="small" x="1015" y="270">Kafka / SQS</text><text class="small" x="1015" y="300">backoff + retry</text>
+  <rect class="box" x="1310" y="180" width="210" height="150"/><text class="label" x="1335" y="235">Provider REST API</text><text class="small" x="1335" y="270">POST /transfers</text><text class="small" x="1335" y="300">GET status</text>
+  <rect class="store" x="1310" y="440" width="210" height="115"/><text class="label" x="1335" y="490">Provider store</text><text class="small" x="1335" y="525">key → final result</text>
+  <path class="arrow" d="M330 255 H520"/><text class="small" x="350" y="235">HTTPS + OAuth2</text><path class="arrow" d="M330 485 H520"/><path class="arrow" d="M800 255 H980"/><text class="small" x="820" y="235">outbox event</text><path class="arrow" d="M1240 255 H1310"/><text class="small" x="1240" y="235">idempotent POST</text><path class="arrow" d="M1415 330 V440"/><text class="small" x="1430" y="390">persist</text><path class="retry" d="M1410 440 C1100 680 980 630 1110 330"/><text class="small" x="1080" y="650">timeout / 5xx: wait, then retry same key</text><path class="arrow" d="M980 310 C900 390 850 390 800 310"/><text class="small" x="825" y="385">status update</text>
+  <text class="small" x="80" y="760">Core safety property: a timeout creates UNKNOWN_OUTCOME. The client resolves by idempotency key before any new POST.</text><text class="small" x="80" y="800">Protocols: HTTPS/TLS 1.3, JSON REST, Idempotency-Key, provider status lookup, OpenTelemetry + audit logs.</text>
+</svg>
+
